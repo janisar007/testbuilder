@@ -76,7 +76,7 @@ jobs:
           pack build $image_name_with_tag --buildpack initializ-buildpacks/web-servers \
                                           --env BP_NODE_RUN_SCRIPTS=build \
                                           --env BP_WEB_SERVER=nginx \
-                                          --env BP_WEB_SERVER_ROOT=dist/multikart/browser
+                                          --env BP_WEB_SERVER_ROOT=build
         fi
 
         docker push $image_name_with_tag

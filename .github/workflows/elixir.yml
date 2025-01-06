@@ -1,4 +1,4 @@
-name: Intz-Builder
+name: elixir-Builder
 
 on:
   workflow_dispatch:

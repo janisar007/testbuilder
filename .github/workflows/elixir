@@ -1,1 +1,43 @@
-a
+name: Intz-Builder
+
+on:
+  workflow_dispatch:
+    inputs:
+      repo-url:
+        description: 'GitHub Repository URL'
+        required: true
+      source-directory:
+        description: 'Directory of the source code within the repository'
+        required: false
+      image-name:
+        description: 'Docker Image Name'
+        required: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      run: |
+        git clone ${{ github.event.inputs['repo-url'] }} source-code
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Install Pack CLI
+      run: |
+        sudo add-apt-repository ppa:cncf-buildpacks/pack-cli -y
+        sudo apt-get update
+        sudo apt-get install pack-cli -y
+    - name: Build image with pack
+      working-directory: ./source-code/${{ github.event.inputs['source-directory'] }}
+      run: |
+        pack build ${{ github.event.inputs['image-name'] }} --builder initializbuildpacks/light-securepack:latest
+    
+    - name: Log in to Docker Hub
+      run: echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+    - name: Push image to Docker Hub
+      run: |
+        docker tag ${{ github.event.inputs['image-name'] }} ${{ secrets.DOCKER_USERNAME }}/${{ github.event.inputs['image-name'] }}:latest
+        docker push ${{ secrets.DOCKER_USERNAME }}/${{ github.event.inputs['image-name'] }}:latest
